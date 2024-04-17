@@ -17,7 +17,8 @@ def user_create():
     last_name = data["last_name"]
     email = data["email"]
 
-    # todo check email
+    if not models.User.validate_email(email):
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
     user = models.User(id, first_name, last_name, email)
     USERS.append(user)

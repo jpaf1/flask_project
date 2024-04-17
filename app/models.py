@@ -1,4 +1,4 @@
-
+import re
 
 class User:
     def __init__(self, id, first_name, last_name, email):
@@ -8,3 +8,8 @@ class User:
         self.email = email
         self.total_reactions = 0
         self.posts = []
+    @staticmethod
+    def validate_email(email):
+        if re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            return True
+        return False
