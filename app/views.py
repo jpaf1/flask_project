@@ -8,7 +8,7 @@ def index():
     return "<h1>Hello world<h1>"
 
 
-@app.post('/users/create', )
+@app.post('/users/create')
 def user_create():
     data = request.get_json()
     id = len(USERS)
@@ -33,3 +33,21 @@ def user_create():
         mimetype = "application/json",
     )
     return response
+
+@app.route('/users/<int:user_id>')
+def show_user(user_id):
+    for i in range(len(USERS)):
+        if USERS[i].id == user_id:
+            response = Response(
+                json.dumps({
+                    "id": USERS[i].id,
+                    "first_name": USERS[i].first_name,
+                    "last_name": USERS[i].last_name,
+                    "email": USERS[i].email,
+                    "total_reactions": USERS[i].total_reactions,
+                    "posts": USERS[i].posts,
+                }),
+                200,
+                mimetype="application/json",
+            )
+            return response
