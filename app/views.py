@@ -2,6 +2,7 @@ from app import app
 from flask import request, Response
 from app import USERS, models
 import json
+from http import HTTPStatus
 
 @app.route('/')
 def index():
@@ -36,6 +37,8 @@ def user_create():
 
 @app.route('/users/<int:user_id>')
 def show_user(user_id):
+    if user_id < 0:
+        return Response(status=HTTPStatus.NOT_FOUND)
     for i in range(len(USERS)):
         if USERS[i].id == user_id:
             response = Response(
@@ -51,3 +54,4 @@ def show_user(user_id):
                 mimetype="application/json",
             )
             return response
+    return Response(status=HTTPStatus.NOT_FOUND)
