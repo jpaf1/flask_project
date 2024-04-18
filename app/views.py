@@ -120,3 +120,47 @@ def post_reaction(post_id):
                     POSTS[i].reactions.append(reaction)
                     return Response(status=200)
     return Response(status=HTTPStatus.NOT_FOUND)
+
+@app.route('/users/leaderboard')
+def leaderboard():
+    data = request.get_json()
+    type = data["type"]
+
+    if type == "list":
+        sort = data["sort"]
+        leaderboard = USERS
+        for i in range(len(leaderboard)-1):
+            for j in range(i+1,len(leaderboard)):
+                if leaderboard[i] < leaderboard[j]:
+                    container = leaderboard[i]
+                    leaderboard[i] = leaderboard[j]
+                    leaderboard[j] = container
+        leaderboard_list = [0]*len(leaderboard)
+        for i in range(len(leaderboard)):
+            leaderboard_list[i] = {
+                "id": leaderboard[i].id,
+                "first_name": leaderboard[i].first_name,
+                "last_name": leaderboard[i].last_name,
+                "email": leaderboard[i].email,
+                "total_reactions": leaderboard[i].total_reactions,
+            }
+        if sort == "desc":
+            response = Response(
+                json.dumps({
+                    "leaderboard": leaderboard_list
+                }),
+                200,
+                mimetype="application/json",
+            )
+            return response
+
+        if sort == "asc":
+            response = Response(
+                json.dumps({
+                    "leaderboard": leaderboard_list[::-1]
+                }),
+                200,
+                mimetype="application/json",
+            )
+            return response
+

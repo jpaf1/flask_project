@@ -13,6 +13,8 @@ class User:
         if re.match(r"[^@]+@[^@]+\.[^@]+", email):
             return True
         return False
+    def __lt__(self, other):
+        return self.total_reactions < other.total_reactions
 
 class Post:
     def __init__(self, id, author_id, text):
