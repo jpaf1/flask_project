@@ -3,10 +3,24 @@ from flask import request, Response
 from app import USERS, POSTS, models
 import json
 from http import HTTPStatus
+import matplotlib.pyplot as plt
+
+plt.rc('xtick', labelsize=8)
+GRAPH = plt.subplot()
 
 @app.route('/')
 def index():
     return "<h1>Hello world<h1>"
+
+@app.route('/test')
+def test():
+    graph = plt.subplot()
+    users = []
+    reactions = []
+    graph.bar(users, reactions)
+    graph.set_ylabel("User reaction")
+    graph.set_title("User leaderboard by score")
+    plt.savefig("leaderboard_graph.png")
 
 
 @app.post('/users/create')
@@ -32,9 +46,10 @@ def user_create():
             "posts": user.posts,
         }),
         200,
-        mimetype = "application/json",
+        mimetype="application/json",
     )
     return response
+
 
 @app.route('/users/<int:user_id>')
 def show_user(user_id):
@@ -56,6 +71,7 @@ def show_user(user_id):
             )
             return response
     return Response(status=HTTPStatus.NOT_FOUND)
+
 
 @app.post('/posts/create')
 def post_create():
@@ -85,6 +101,7 @@ def post_create():
             return response
     return Response(status=HTTPStatus.BAD_REQUEST)
 
+
 @app.route('/posts/<int:post_id>')
 def show_post(post_id):
     if post_id < 0:
@@ -104,6 +121,7 @@ def show_post(post_id):
             return response
     return Response(status=HTTPStatus.NOT_FOUND)
 
+
 @app.post('/posts/<int:post_id>/reaction')
 def post_reaction(post_id):
     data = request.get_json()
@@ -121,29 +139,30 @@ def post_reaction(post_id):
                     return Response(status=200)
     return Response(status=HTTPStatus.NOT_FOUND)
 
+
 @app.route('/users/leaderboard')
 def leaderboard():
     data = request.get_json()
     type = data["type"]
 
+    leaderboard = USERS
+    for i in range(len(leaderboard) - 1):
+        for j in range(i + 1, len(leaderboard)):
+            if leaderboard[i] < leaderboard[j]:
+                container = leaderboard[i]
+                leaderboard[i] = leaderboard[j]
+                leaderboard[j] = container
     if type == "list":
         sort = data["sort"]
-        leaderboard = USERS
-        for i in range(len(leaderboard)-1):
-            for j in range(i+1,len(leaderboard)):
-                if leaderboard[i] < leaderboard[j]:
-                    container = leaderboard[i]
-                    leaderboard[i] = leaderboard[j]
-                    leaderboard[j] = container
-        leaderboard_list = [0]*len(leaderboard)
+        leaderboard_list = []
         for i in range(len(leaderboard)):
-            leaderboard_list[i] = {
+            leaderboard_list.append({
                 "id": leaderboard[i].id,
                 "first_name": leaderboard[i].first_name,
                 "last_name": leaderboard[i].last_name,
                 "email": leaderboard[i].email,
                 "total_reactions": leaderboard[i].total_reactions,
-            }
+            })
         if sort == "desc":
             response = Response(
                 json.dumps({
@@ -163,4 +182,17 @@ def leaderboard():
                 mimetype="application/json",
             )
             return response
-
+    if type == "graph":
+        users = []
+        reactions = []
+        for i in range(len(leaderboard)):
+            users.append(f"{leaderboard[i].first_name} {leaderboard[i].last_name} ({leaderboard[i].id})")
+            reactions.append(leaderboard[i].total_reactions)
+        GRAPH.bar(users, reactions)
+        GRAPH.set_ylabel("User reaction")
+        GRAPH.set_title("User leaderboard by score")
+        plt.savefig("app/static/leaderboard_graph.png")
+        return Response('<img src="/static/leaderboard_graph.png">',
+                        status=200,
+                        mimetype="text/html",
+                        )
