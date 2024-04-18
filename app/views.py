@@ -103,3 +103,20 @@ def show_post(post_id):
             )
             return response
     return Response(status=HTTPStatus.NOT_FOUND)
+
+@app.post('/posts/<int:post_id>/reaction')
+def post_reaction(post_id):
+    data = request.get_json()
+    try:
+        user_id = int(data["user_id"])
+    except:
+        return Response(status=HTTPStatus.BAD_REQUEST)
+    reaction = data["reaction"]
+    for i in range(len(USERS)):
+        if USERS[i].id == user_id:
+            USERS[i].total_reactions += 1
+            for i in range(len(POSTS)):
+                if POSTS[i].id == post_id:
+                    POSTS[i].reactions.append(reaction)
+                    return Response(status=200)
+    return Response(status=HTTPStatus.NOT_FOUND)
