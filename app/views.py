@@ -85,3 +85,21 @@ def post_create():
             return response
     return Response(status=HTTPStatus.BAD_REQUEST)
 
+@app.route('/posts/<int:post_id>')
+def show_post(post_id):
+    if post_id < 0:
+        return Response(status=HTTPStatus.NOT_FOUND)
+    for i in range(len(POSTS)):
+        if POSTS[i].id == post_id:
+            response = Response(
+                json.dumps({
+                    "id": POSTS[i].id,
+                    "author_id": POSTS[i].author_id,
+                    "text": POSTS[i].text,
+                    "reactions": POSTS[i].reactions,
+                }),
+                200,
+                mimetype="application/json",
+            )
+            return response
+    return Response(status=HTTPStatus.NOT_FOUND)
