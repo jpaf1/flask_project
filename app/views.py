@@ -1,6 +1,6 @@
 from app import app
 from flask import request, Response
-from app import USERS, models
+from app import USERS, POSTS, models
 import json
 from http import HTTPStatus
 
@@ -56,3 +56,32 @@ def show_user(user_id):
             )
             return response
     return Response(status=HTTPStatus.NOT_FOUND)
+
+@app.post('/posts/create')
+def post_create():
+    data = request.get_json()
+    id = len(POSTS)
+    try:
+        author_id = int(data["author_id"])
+    except:
+        return Response(status=HTTPStatus.BAD_REQUEST)
+    text = data["text"]
+
+    post = models.Post(id, author_id, text)
+    for i in range(len(USERS)):
+        if USERS[i].id == author_id:
+            POSTS.append(post)
+            USERS[i].posts.append(id)
+            response = Response(
+                json.dumps({
+                    "id": post.id,
+                    "author_id": post.author_id,
+                    "text": post.text,
+                    "reactions": post.reactions,
+                }),
+                200,
+                mimetype="application/json",
+            )
+            return response
+    return Response(status=HTTPStatus.BAD_REQUEST)
+
