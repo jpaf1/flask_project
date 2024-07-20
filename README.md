@@ -167,6 +167,7 @@ Request example:
 Response example:
 ```html
 <img src="path_to_graph">
+```
 
 #Краткое описание файлов проекта:
 
