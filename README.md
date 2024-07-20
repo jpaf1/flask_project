@@ -169,7 +169,7 @@ Response example:
 <img src="path_to_graph">
 ```
 
-#Краткое описание файлов проекта:
+# Краткое описание файлов проекта:
 
 - run.py - run API
 
